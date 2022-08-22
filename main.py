@@ -17,7 +17,7 @@ def run():
     distribution_hostname = input('Distribution switch hostname, with XXX replacing the idf number: ').strip()
     prev, next = distribution_hostname.split('XXX')
 
-    number = 0
+    number = 18
     errors = 0
 
     while errors<3:
@@ -25,7 +25,7 @@ def run():
         idf_number = str(number)
 
         dis_name = prev + idf_number + next
-        print("Proceeding to write IDF book for: " + dis_name)
+        
         # book_filename  
         # book_filename = input('Book filename (without .docx): ')
         book_filename = 'Blueprint'
@@ -37,6 +37,7 @@ def run():
         if net_connect_dis_sw == 1:
             errors += 1
             continue
+        print("Proceeding to write IDF book for: " + dis_name)
 
         # Retrieving switch set
         switch_set = get_neighbors_set(net_connect_dis_sw,'acc')

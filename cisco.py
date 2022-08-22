@@ -37,9 +37,10 @@ def connect_to_cisco(username, password, hostname):
         # Establish SSH connection with switch and router
         net_connect = ConnectHandler(**cisco_device)
     except:
-        print('No such device')
+        return 1
+    else:
+        return net_connect
 
-    return net_connect
 
 
 '''
