@@ -89,19 +89,6 @@ def get_aggregator_info(idf_number,username,password,net_connect_dis_sw):
     return agg_df
 
 
-def get_switch_uplinks():
-    # Send command to grab interfaces that contain '-->' in description
-    # Does not use textfsm, just regex
-    switch_uplink_raw = net_connect.send_command('sh int desc | inc -->')
-
-    # Regex to remove 'up'
-    switch_uplink_rmup = re.sub('<*.?up', '', switch_uplink_raw)
-
-    # Regex to remove large spacing
-    global switch_uplink
-    switch_uplink = re.sub('<?\s{20}', '', switch_uplink_rmup)
-
-
 def get_mac_address(net_connect_acc_sw,local_interface):
     mac_address_table = net_connect_acc_sw.send_command('show mac address-table int ' + local_interface, use_textfsm=True)
     for entry in mac_address_table: # GRAVE POF fixare asap
