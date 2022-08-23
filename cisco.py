@@ -82,7 +82,7 @@ def get_aggregator_info(idf_number,username,password,net_connect_dis_sw):
     agg_df = pd.DataFrame(columns=('Aggregator Name','Interface','IP'))
 
     for entry in cdp_neighbors:
-        if 'agg-t1' in entry['neighbor']:
+        if 'agg' in entry['neighbor']:
             agg_df.loc[agg_count] = [entry['neighbor'],entry['neighbor_interface'], get_aggregator_IP(idf_number,username,password,entry['neighbor'])]
             agg_count += 1
     
@@ -105,21 +105,22 @@ def get_ip_arp(net_connect_dis_sw,mac_address):
 Scegliere se usare, come ho fatto, comandi da terminale nelle 2 slave functions 
 o se restituire dicts e poi fare ricerche algoritmiche
 '''
-def get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch):                     
+def get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch, device_models):                     
     cdp_neighbors = net_connect_acc_sw.send_command('show cdp neighbors', use_textfsm=True)
 
     ap_df = pd.DataFrame(columns=('Switch','AP Name','Interface','MAC','IP'))
     ap_count = 0
 
     for ap in cdp_neighbors:
-        if ap['platform'] == 'C9120AXI-': # GRAVE POF research better solution
-            ap_name = ap['neighbor']
-            ap_local_interface = ap['local_interface']
-            ap_mac_address = get_mac_address(net_connect_acc_sw , ap_local_interface)
-            ap_ip_address = get_ip_arp(net_connect_dis_sw , ap_mac_address)
+        for model in device_models:
+            if model in ap['platform']: # GRAVE POF research better solution
+                ap_name = ap['neighbor']
+                ap_local_interface = ap['local_interface']
+                ap_mac_address = get_mac_address(net_connect_acc_sw , ap_local_interface)
+                ap_ip_address = get_ip_arp(net_connect_dis_sw , ap_mac_address)
 
-            ap_df.loc[ap_count] = [switch,ap_name,ap_local_interface,format_mac(ap_mac_address),ap_ip_address]
-            ap_count += 1
+                ap_df.loc[ap_count] = [switch,ap_name,ap_local_interface,format_mac(ap_mac_address),ap_ip_address]
+                ap_count += 1
     
     return ap_df
 

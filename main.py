@@ -19,6 +19,12 @@ def run():
     if next[-11:] != '.amazon.com':
         next = next + '.amazon.com'
 
+    device_models = []
+    while(True):
+        model = input("Insert all access points models, when finished input '-1' (Retrievable running 'sh cdp ne' in an acc-sw): ")
+        if model == '-1': break
+        device_models.append(model)
+
     number = 0
     errors = 0
 
@@ -74,7 +80,7 @@ def run():
             # camera df vertical concat
             camera_df = pd.concat([camera_df,get_camera_info(net_connect_acc_sw,switch)], axis = 0)
             # AP df loc
-            ap_df = pd.concat([ap_df,get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch)], axis = 0)
+            ap_df = pd.concat([ap_df,get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch, device_models)], axis = 0)
 
         style = document.styles['Normal']
         font = style.font
