@@ -113,7 +113,7 @@ def get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch, device_models):
 
     for ap in cdp_neighbors:
         for model in device_models:
-            if model in ap['platform']: # GRAVE POF research better solution
+            if re.search(model,ap['platform'],re.IGNORECASE):
                 ap_name = ap['neighbor']
                 ap_local_interface = ap['local_interface']
                 ap_mac_address = get_mac_address(net_connect_acc_sw , ap_local_interface)
