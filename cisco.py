@@ -83,7 +83,7 @@ def get_aggregator_info(idf_number,username,password,net_connect_dis_sw):
 
     for entry in cdp_neighbors:
         if 'agg-t1' in entry['neighbor']:
-            agg_df.loc[agg_count] = [entry['neighbor'][:-11],entry['neighbor_interface'], get_aggregator_IP(idf_number,username,password,entry['neighbor'])]
+            agg_df.loc[agg_count] = [entry['neighbor'],entry['neighbor_interface'], get_aggregator_IP(idf_number,username,password,entry['neighbor'])]
             agg_count += 1
     
     return agg_df

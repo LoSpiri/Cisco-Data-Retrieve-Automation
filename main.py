@@ -16,8 +16,10 @@ def run():
     # idf_number
     distribution_hostname = input('Distribution switch hostname, with XXX replacing the idf number: ').strip()
     prev, next = distribution_hostname.split('XXX')
+    if next[-11:] != '.amazon.com':
+        next = next + '.amazon.com'
 
-    number = 18
+    number = 0
     errors = 0
 
     while errors<3:
