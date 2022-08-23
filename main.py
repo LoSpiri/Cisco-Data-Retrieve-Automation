@@ -1,5 +1,4 @@
 
-from netmiko import ConfigInvalidException
 from docx import Document
 from docx.shared import Pt
 from cisco import *
@@ -19,10 +18,13 @@ def run():
     if next[-11:] != '.amazon.com':
         next = next + '.amazon.com'
 
+    ups_vlan = input("Enter UPS vlan (Retrievable running 'sh vlan brief' in any device) :")
+
     device_models = []
     while(True):
-        model = input("Insert all access points models, when finished input '-1' (Retrievable running 'sh cdp ne' in an acc-sw): ")
-        if model == '-1': break
+        full_model = input("Insert all access points models, when finished input 'end' (Retrievable running 'sh cdp ne' in an acc-sw): ")
+        model = full_model.split('-')[0]
+        if model == 'end': break
         device_models.append(model)
 
     number = 0
@@ -55,7 +57,7 @@ def run():
         agg_df = get_aggregator_info(idf_number,username,password,net_connect_dis_sw)
 
         # UPS df
-        ups_df = get_ups_info(net_connect_dis_sw)
+        ups_df = get_ups_info(net_connect_dis_sw, ups_vlan)
 
         # Switchs df
         switch_count = 0
@@ -70,7 +72,9 @@ def run():
         ap_df = pd.DataFrame(columns=('Switch','AP Name','Interface','MAC','IP'))
 
         # itero gli switch e concat
-        for switch in sorted(switch_set): 
+        for switch in sorted(switch_set):
+        #   Retrieving data from: bgy1-fc-acc-sw-2-1.amazon.com
+        #   Retrieving data from: bgy1-fc-acc-sw-2-10.amazon.com
             print("Retrieving data from: " + switch)
             net_connect_acc_sw = connect_to_cisco(username,password,switch)
             # switch df loc
@@ -81,6 +85,9 @@ def run():
             camera_df = pd.concat([camera_df,get_camera_info(net_connect_acc_sw,switch)], axis = 0)
             # AP df loc
             ap_df = pd.concat([ap_df,get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch, device_models)], axis = 0)
+            net_connect_acc_sw.disconnect()
+        
+        net_connect_dis_sw.disconnect()
 
         style = document.styles['Normal']
         font = style.font

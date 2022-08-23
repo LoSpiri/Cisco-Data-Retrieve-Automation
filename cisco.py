@@ -68,6 +68,7 @@ def get_switch_IP(net_connect_general):
 def get_aggregator_IP(idf_number,username,password,agg_hostname):
     net_connect_agg_t1 = connect_to_cisco(username,password,agg_hostname)
     ip_interfaces = net_connect_agg_t1.send_command('show ip interface brief', use_textfsm=True)
+    net_connect_agg_t1.disconnect()
 
     for entry in ip_interfaces:
         if entry['intf'] == 'Port-channel' + str(idf_number):
@@ -83,7 +84,9 @@ def get_aggregator_info(idf_number,username,password,net_connect_dis_sw):
 
     for entry in cdp_neighbors:
         if 'agg' in entry['neighbor']:
-            agg_df.loc[agg_count] = [entry['neighbor'],entry['neighbor_interface'], get_aggregator_IP(idf_number,username,password,entry['neighbor'])]
+            agg_hostname = entry['neighbor']
+            print(agg_hostname)
+            agg_df.loc[agg_count] = [agg_hostname,entry['neighbor_interface'], get_aggregator_IP(idf_number,username,password,agg_hostname)]
             agg_count += 1
     
     return agg_df
@@ -102,8 +105,7 @@ def get_ip_arp(net_connect_dis_sw,mac_address):
 
 
 '''
-Scegliere se usare, come ho fatto, comandi da terminale nelle 2 slave functions 
-o se restituire dicts e poi fare ricerche algoritmiche
+Future REFACTOR with hash table, reducing commands
 '''
 def get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch, device_models):                     
     cdp_neighbors = net_connect_acc_sw.send_command('show cdp neighbors', use_textfsm=True)
@@ -158,22 +160,15 @@ def get_camera_info(net_connect_general,switch):
     return camera_df
 
 
-def get_ups_info(net_connect_dis_sw):
-    get_vlan_raw = net_connect_dis_sw.send_command('show vlan brief', use_textfsm=True)
+def get_ups_info(net_connect_dis_sw, ups_vlan):
     ups_df = pd.DataFrame(columns=('Hostname','IP','MAC','VLAN'))
     ups_count = 0
 
-    for entry in get_vlan_raw:
-        if 'APC' in entry['name']:
-            ups_vlan = entry['vlan_id']       # FIXME: references only the last occurrence
-    
     mac_address_table = net_connect_dis_sw.send_command('show mac address-table vlan ' + ups_vlan, use_textfsm=True)  # show ip arp e salto un passaggio 
     for entry in mac_address_table:
         if 'Po' in entry['destination_port'][0]:
             mac_address = entry['destination_address']
             ip_arp = net_connect_dis_sw.send_command('show ip arp ' + mac_address, use_textfsm=True)
-            if len(ip_arp) > 1:               # TODO: test for checking raw array lenght
-                print("More than an IP on this MAC")
             ip_address = ip_arp[0]['address']
 
             byte_string = cmdline('nslookup ' + ip_address)
