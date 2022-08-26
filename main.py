@@ -1,5 +1,3 @@
-
-from netmiko import ConfigInvalidException
 from docx import Document
 from docx.shared import Pt
 from cisco import *
