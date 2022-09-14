@@ -39,6 +39,8 @@ def run():
             continue
         print("Proceeding to write IDF book for: " + dis_name)
 
+        net_connect_dis_sw.enable()
+
         # Retrieving switch set
         switch_set = get_neighbors_set(net_connect_dis_sw,'acc')
 
@@ -73,6 +75,10 @@ def run():
             camera_df = pd.concat([camera_df,get_camera_info(net_connect_acc_sw,switch)], axis = 0)
             # AP df loc
             ap_df = pd.concat([ap_df,get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch)], axis = 0)
+
+            net_connect_acc_sw.disconnect()
+
+        net_connect_dis_sw.disconnect()
 
         style = document.styles['Normal']
         font = style.font
