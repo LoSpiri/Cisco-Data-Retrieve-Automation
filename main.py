@@ -28,7 +28,7 @@ def run():
         
         # book_filename  
         # book_filename = input('Book filename (without .docx): ')
-        book_filename = 'Blueprint'
+        book_filename = 'Blueprint IDF Book'
         document = Document(book_filename + '.docx')
 
         replace_text(get_paragraph(document.paragraphs,'FC IT IDF 1 BOOK'),'IDF 1','IDF ' + idf_number)
