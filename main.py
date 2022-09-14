@@ -1,3 +1,4 @@
+from importlib.metadata import distribution
 from docx import Document
 from docx.shared import Pt
 from cisco import *
@@ -13,15 +14,15 @@ class myThread (threading.Thread):
       self.numberlock = numberlock
       self.errorlock = errorlock
    def run(self):
-      print ("Starting IDF " + self.number)
       create_book(self.numberlock, self.errorlock)
-      print ("Exiting IDF " + self.number)
 
 
 
 def create_book(numberlock, errorlock):
+    global error
     while(error < 3):
         numberlock.acquire()
+        global number
         number += 1
         numberlock.release()
         idf_number = str(number)
@@ -30,7 +31,7 @@ def create_book(numberlock, errorlock):
         
         # book_filename  
         # book_filename = input('Book filename (without .docx): ')
-        book_filename = 'Blueprint'
+        book_filename = 'Blueprint IDF Book'
         document = Document(book_filename + '.docx')
 
         replace_text(get_paragraph(document.paragraphs,'FC IT IDF 1 BOOK'),'IDF 1','IDF ' + idf_number)
@@ -40,7 +41,11 @@ def create_book(numberlock, errorlock):
             errorlock.acquire()
             error += 1
             errorlock.release()
+            print(dis_name + 'not found')
+            continue
         print("Proceeding to write IDF book for: " + dis_name)
+
+        net_connect_dis_sw.enable()
 
         # Retrieving switch set
         switch_set = get_neighbors_set(net_connect_dis_sw,'acc')
@@ -115,7 +120,7 @@ def run():
     if next[-11:] != '.amazon.com':
         next = next + '.amazon.com'
 
-    ups_vlan = input("Enter UPS vlan (Retrievable running 'sh vlan brief' in any device) :")
+    ups_vlan = input("Enter UPS vlan (Retrievable running 'sh vlan brief' in any device): ")
 
     device_models = []
     while(True):
@@ -127,10 +132,10 @@ def run():
     number = 0
     error = 0
 
-    for i in range(4):
+    for i in range(12):
         thread = myThread(numberlock, errorlock)
         thread.start()
 
-    print('Dovrei aver finito!')
+    print('Si parte!')
 
 run() 
