@@ -18,7 +18,7 @@ def run():
     if next[-11:] != '.amazon.com':
         next = next + '.amazon.com'
 
-    ups_vlan = input("Enter UPS vlan (Retrievable running 'sh vlan brief' in any device) :")
+    ups_vlan = input("Enter UPS vlan (Retrievable running 'sh vlan brief' in any device): ")
 
     device_models = []
     while(True):
@@ -48,6 +48,8 @@ def run():
             errors += 1
             continue
         print("Proceeding to write IDF book for: " + dis_name)
+
+        net_connect_dis_sw.enable()
 
         # Retrieving switch set
         switch_set = get_neighbors_set(net_connect_dis_sw,'acc')
