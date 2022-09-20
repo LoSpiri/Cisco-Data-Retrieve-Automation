@@ -80,16 +80,15 @@ def get_aggregator_info(idf_number,username,password,net_connect_dis_sw):
     cdp_neighbors = net_connect_dis_sw.send_command('show cdp neighbors', use_textfsm=True)
 
     agg_count = 0
-    agg_df = pd.DataFrame(columns=('Aggregator Name','Interface','IP'))
+    aggregator_df = pd.DataFrame(columns=('Aggregator Name','IP'))
 
     for entry in cdp_neighbors:
         if 'agg' in entry['neighbor']:
             agg_hostname = entry['neighbor']
-            print(agg_hostname)
-            agg_df.loc[agg_count] = [agg_hostname,entry['neighbor_interface'], get_aggregator_IP(idf_number,username,password,agg_hostname)]
+            aggregator_df.loc[agg_count] = [agg_hostname, get_aggregator_IP(idf_number,username,password,agg_hostname)]
             agg_count += 1
     
-    return agg_df
+    return aggregator_df
 
 
 def get_mac_address(net_connect_acc_sw,local_interface):

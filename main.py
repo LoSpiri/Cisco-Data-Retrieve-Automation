@@ -1,4 +1,3 @@
-from importlib.metadata import distribution
 from docx import Document
 from docx.shared import Pt
 from cisco import *
@@ -25,9 +24,9 @@ def create_book(numberlock, errorlock):
         global number
         number += 1
         numberlock.release()
+        
         idf_number = str(number)
-
-        dis_name = prev + idf_number + next
+        dis_name = distribution_hostname.replace('XXX',idf_number)
         
         # book_filename  
         # book_filename = input('Book filename (without .docx): ')
@@ -41,21 +40,16 @@ def create_book(numberlock, errorlock):
             errorlock.acquire()
             error += 1
             errorlock.release()
-            print(dis_name + 'not found')
             continue
-        print("Proceeding to write IDF book for: " + dis_name)
+        print("Writing IDF book number: " + idf_number)
 
         net_connect_dis_sw.enable()
 
         # Retrieving switch set
         switch_set = get_neighbors_set(net_connect_dis_sw,'acc')
 
-        # CREATE DFs
-        # Aggregators df
-        agg_df = get_aggregator_info(idf_number,username,password,net_connect_dis_sw)
-
         # UPS df
-        ups_df = get_ups_info(net_connect_dis_sw, ups_vlan)
+        ups_df = get_ups_info(net_connect_dis_sw, '708')
 
         # Switchs df
         switch_count = 0
@@ -83,9 +77,9 @@ def create_book(numberlock, errorlock):
             camera_df = pd.concat([camera_df,get_camera_info(net_connect_acc_sw,switch)], axis = 0)
             # AP df loc
             ap_df = pd.concat([ap_df,get_AP_info(net_connect_acc_sw,net_connect_dis_sw,switch, device_models)], axis = 0)
-            net_connect_acc_sw.disconnect()
+            net_connect_acc_sw.cleanup()
         
-        net_connect_dis_sw.disconnect()
+        net_connect_dis_sw.cleanup()
 
         style = document.styles['Normal']
         font = style.font
@@ -106,25 +100,22 @@ def create_book(numberlock, errorlock):
 
 
 def run():
-    # could return tuple
-    # username
-    global username, password, prev, next, device_models, ups_vlan, number, error
+    print("It's starting!")
+
+    global username, password, distribution_hostname, device_models, number, error, agg_df
     numberlock = threading.Lock()
     errorlock = threading.Lock()
+    # username
     username = input('Username: ')
     # password  
     password = getpass.getpass("Password: ")
     # idf_number
-    distribution_hostname = input('Distribution switch hostname, with XXX replacing the idf number: ').strip()
-    prev, next = distribution_hostname.split('XXX')
-    if next[-11:] != '.amazon.com':
-        next = next + '.amazon.com'
-
-    ups_vlan = input("Enter UPS vlan (Retrievable running 'sh vlan brief' in any device): ")
+    whid = input('Enter your WHID: ').strip()
+    distribution_hostname = whid + "-fc-dis-r-XXX-1.amazon.com"
 
     device_models = []
     while(True):
-        full_model = input("Insert all access points models, when finished input 'end' (Retrievable running 'sh cdp ne' in an acc-sw): ")
+        full_model = input("Insert all access points models (ssh whid-fc-wlc-a-1 -> show ap sum), when finished input 'end': ")
         model = full_model.split('-')[0]
         if model == 'end': break
         device_models.append(model)
@@ -132,10 +123,14 @@ def run():
     number = 0
     error = 0
 
-    for i in range(12):
+    net_connect_once = connect_to_cisco(username,password,distribution_hostname.replace('XXX','1'))
+    # CREATE DFs
+    # Aggregators df
+    agg_df = get_aggregator_info('1',username,password,net_connect_once)
+    net_connect_once.cleanup()
+
+    for i in range(6):
         thread = myThread(numberlock, errorlock)
         thread.start()
-
-    print('Si parte!')
 
 run() 
