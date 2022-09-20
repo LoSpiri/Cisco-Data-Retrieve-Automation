@@ -92,7 +92,7 @@ def create_book(numberlock, errorlock):
         df_to_table_at_position(document,agg_df,'Aggregators')
         df_to_table_at_position(document,ups_df,'UPS')
 
-        document.save('IDF' + idf_number + ' Book.docx')
+        document.save('BGY1 FC IT IDF' + idf_number + ' BOOK.docx')
     
     return 0
 
@@ -100,7 +100,6 @@ def create_book(numberlock, errorlock):
 
 
 def run():
-    print("It's starting!")
 
     global username, password, distribution_hostname, device_models, number, error, agg_df
     numberlock = threading.Lock()
@@ -122,6 +121,8 @@ def run():
 
     number = 0
     error = 0
+
+    print("It's starting!")
 
     net_connect_once = connect_to_cisco(username,password,distribution_hostname.replace('XXX','1'))
     # CREATE DFs
